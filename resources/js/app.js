@@ -24,44 +24,6 @@ const grades = [
 
 const gradeShortNames = ['الأول', 'الثاني', 'الثالث', 'الرابع', 'الخامس', 'السادس', 'السابع', 'الثامن', 'التاسع'];
 
-const lessons = [
-    { title: 'أصوات الحروف', type: 'done' },
-    { title: 'مطابقة الكلمات', type: 'done' },
-    { title: 'قراءة سريعة', type: 'done' },
-    { title: 'تدريب استماع', type: 'done' },
-    { title: 'بناء الجملة', type: 'done' },
-    { title: 'تدريب إملاء', type: 'active' },
-    { title: 'فهم قصة', type: 'locked' },
-    { title: 'التحدي النهائي', type: 'locked' },
-];
-
-const questions = {
-    english: {
-        title: 'تدريب إملاء',
-        prompt: 'اختار الكلمة التي تبدأ بحرف A.',
-        answers: ['Apple', 'Book', 'Moon'],
-        correct: 'Apple',
-    },
-    arabic: {
-        title: 'تدريب الحروف',
-        prompt: 'أي بطاقة تمثل درس العربي؟',
-        answers: ['كتاب', 'مجهر', 'كرة أرضية'],
-        correct: 'كتاب',
-    },
-    math: {
-        title: 'تدريب القياس',
-        prompt: 'أي أداة نستخدمها للقياس؟',
-        answers: ['مسطرة', 'كتاب', 'هدف'],
-        correct: 'مسطرة',
-    },
-    science: {
-        title: 'تدريب المختبر',
-        prompt: 'أي رمز يدل على مادة العلوم؟',
-        answers: ['مجهر', 'قمر', 'بيت'],
-        correct: 'مجهر',
-    },
-};
-
 const learningUnits = [];
 
 const state = loadState();
@@ -552,25 +514,6 @@ function pathView() {
     return learningView();
 }
 
-function lessonNode(lesson, index) {
-    const x = [0, 60, 8, -58, -16, 56, 24, -52][index] || 0;
-    const status = state.completed.includes(index) ? 'done' : lesson.type;
-    return `
-        <div class="road-step" style="--shift:${x}px">
-            ${index < lessons.length - 1 ? `<span class="road-connector ${status === 'locked' ? 'muted' : ''}"></span>` : ''}
-            <button
-                class="lesson-node ${status}"
-                ${status === 'locked' ? 'disabled' : ''}
-                data-open-lesson="${index}"
-                aria-label="${lesson.title}"
-            >
-                ${status === 'done' ? icon('check') : status === 'locked' ? icon('lock') : icon('star')}
-                ${status === 'active' ? `<span class="lesson-tooltip">${lesson.title}<i></i></span>` : ''}
-            </button>
-        </div>
-    `;
-}
-
 function learningView() {
     if (state.teacherPanel) return teacherDashboardView();
     if (state.lessonMode === 'lesson') return lessonPlayerView();
@@ -942,41 +885,6 @@ function teacherQuestionEditor(listName, item, index, withScore) {
     `;
 }
 
-function lessonView() {
-    const subject = currentSubject();
-    const q = questions[subject.id] || questions.english;
-    return shell(`
-        <section class="practice-page">
-            <button class="circle-back" data-view="path">${icon('back')}</button>
-            <article class="practice-card">
-                <div class="practice-top">
-                    <div class="subject-badge small" style="--subject:${subject.color};--subject-bg:${subject.bg}">
-                        ${subjectIcon(subject)}
-                    </div>
-                    <div>
-                        <p>${subject.name}</p>
-                        <h1>${q.title}</h1>
-                    </div>
-                </div>
-                <h2>${q.prompt}</h2>
-                <div class="answer-grid">
-                    ${q.answers.map((answer) => `
-                        <button class="answer-choice ${state.selectedAnswer === answer ? 'is-picked' : ''}" data-answer="${answer}">
-                            ${answer}
-                        </button>
-                    `).join('')}
-                </div>
-                <footer class="practice-footer">
-                    <p class="${state.lastResult === 'إجابة صحيحة!' ? 'success' : state.lastResult ? 'error' : ''}">
-                        ${state.lastResult || ' '}
-                    </p>
-                    <button class="check-btn" data-check-answer="true" ${state.selectedAnswer ? '' : 'disabled'}>تحقق</button>
-                </footer>
-            </article>
-        </section>
-    `);
-}
-
 function awardsView() {
     const badges = [
         ['هدف اليوم', `${state.dailyGoal}/4 مواد اليوم`, 'target'],
@@ -1031,7 +939,7 @@ function render() {
         learn: subjectsView,
         subjects: subjectsView,
         path: pathView,
-        lesson: lessonView,
+        lesson: lessonPlayerView,
         awards: awardsView,
         leaders: leadersView,
     };
@@ -1259,35 +1167,6 @@ app.addEventListener('click', (event) => {
         return;
     }
 
-    if (button.dataset.openLesson) {
-        state.view = 'lesson';
-        state.selectedAnswer = '';
-        state.lastResult = '';
-        render();
-        scrollMainTop();
-        return;
-    }
-
-    if (button.dataset.answer) {
-        state.selectedAnswer = button.dataset.answer;
-        state.lastResult = '';
-        render();
-        return;
-    }
-
-    if (button.dataset.checkAnswer) {
-        const q = questions[state.subject] || questions.english;
-        const correct = state.selectedAnswer === q.correct;
-        state.lastResult = correct ? 'إجابة صحيحة!' : 'حاول مرة ثانية';
-        if (correct) {
-            state.xp += 10;
-            state.dailyCompletions[dailyCompletionKey()] = true;
-            syncDailyGoal();
-            if (!state.completed.includes(5)) state.completed.push(5);
-        }
-        saveState();
-        render();
-    }
 });
 
 function updateTeacherDraft(target) {
