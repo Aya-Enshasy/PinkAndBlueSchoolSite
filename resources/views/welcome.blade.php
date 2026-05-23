@@ -6,7 +6,7 @@
         <meta name="theme-color" content="#f7fbff">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>ليرنت</title>
+        <title>Pink &amp; Blue School</title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=tajawal:400,500,700,800" rel="stylesheet" />

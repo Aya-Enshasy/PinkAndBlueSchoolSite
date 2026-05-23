@@ -1,13 +1,13 @@
 import './bootstrap';
 
 const app = document.querySelector('#app');
-const STORAGE_KEY = 'learnit-platform-state-v2';
+const STORAGE_KEY = 'pink-blue-school-state-v7';
 
 const subjects = [
-    { id: 'arabic', name: 'عربي', color: '#f59e0b', bg: '#fff7e8', border: '#fde5b8', icon: 'book' },
-    { id: 'english', name: 'إنجليزي', color: '#10b981', bg: '#eafaf4', border: '#bcefdc', icon: 'abc' },
-    { id: 'math', name: 'حساب', color: '#6366f1', bg: '#eef0ff', border: '#d8ddff', icon: 'ruler' },
-    { id: 'science', name: 'علوم', color: '#3b82f6', bg: '#edf5ff', border: '#cfe2ff', icon: 'micro' },
+    { id: 'arabic', name: 'عربي', color: '#d22d78', bg: '#fff0f7', border: '#f8c6dc', icon: 'book' },
+    { id: 'english', name: 'إنجليزي', color: '#215b9f', bg: '#edf6ff', border: '#bfddff', icon: 'abc' },
+    { id: 'math', name: 'حساب', color: '#8b5cf6', bg: '#f4f0ff', border: '#ddd0ff', icon: 'ruler' },
+    { id: 'science', name: 'علوم', color: '#0ea5e9', bg: '#eefaff', border: '#bae6fd', icon: 'micro' },
 ];
 
 const grades = [
@@ -54,6 +54,8 @@ function loadState() {
             selectedAnswer: '',
             lastResult: '',
             currentQuestion: 0,
+            currentTheoryBlock: Number(saved?.currentTheoryBlock || 0),
+            imageSearch: { blockIndex: null, query: '', results: [], message: '' },
             teacherPanel: false,
         };
     } catch {
@@ -78,6 +80,8 @@ function loadState() {
             selectedAnswer: '',
             lastResult: '',
             currentQuestion: 0,
+            currentTheoryBlock: 0,
+            imageSearch: { blockIndex: null, query: '', results: [], message: '' },
             teacherPanel: false,
         };
     }
@@ -133,7 +137,7 @@ function syncDailyGoal() {
 }
 
 function saveState() {
-    const { selectedAnswer, lastResult, ...persisted } = state;
+    const { selectedAnswer, lastResult, imageSearch, ...persisted } = state;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
 }
 
@@ -150,6 +154,20 @@ function defaultTeacherDraft() {
         lessonTitle: '',
         theoryTitle: '',
         theoryBody: '',
+        theoryBlocks: [
+            {
+                type: 'hook',
+                emoji: '✨',
+                title: '',
+                body: '',
+                term: '',
+                symbol: '',
+                items: '',
+                result: '',
+                note: '',
+                url: '',
+            },
+        ],
         examples: [
             {
                 title: '',
@@ -262,7 +280,214 @@ function escapeHtml(value = '') {
 function optionList(value) {
     if (Array.isArray(value)) return value.filter(Boolean);
     return String(value || '')
-        .split('،')
+        .split(/[,،\n]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function defaultTheoryBlock(type = 'hook') {
+    const base = {
+        type,
+        emoji: '✨',
+        title: '',
+        body: '',
+        term: '',
+        symbol: '',
+        items: '',
+        result: '',
+        note: '',
+        url: '',
+        imageUrl: '',
+        fileName: '',
+    };
+
+    const presets = {
+        hook: { emoji: '🎯', title: 'فكرة تشويقية' },
+        definition: { emoji: '💡', title: 'تعريف', term: '', symbol: '' },
+        idea: { emoji: '🧠', title: 'الفكرة المهمة' },
+        example: { emoji: '🎲', title: 'مثال سريع' },
+        tip: { emoji: '⭐', title: 'تذكّر' },
+        youtube: { emoji: '▶', title: 'فيديو مساعد' },
+        pdf: { emoji: '📄', title: 'ملف PDF مساعد' },
+    };
+
+    return { ...base, ...(presets[type] || presets.hook) };
+}
+
+function normalizeTheoryBlocks(draft) {
+    const blocks = Array.isArray(draft.theoryBlocks) ? draft.theoryBlocks : [];
+    const normalized = blocks
+        .map((block) => ({
+            ...defaultTheoryBlock(block.type || 'hook'),
+            ...block,
+            type: block.type || 'hook',
+        }))
+        .filter((block) => block.title || block.body || block.term || block.url || block.items || block.result);
+
+    if (normalized.length) return normalized;
+
+    if (draft.theoryTitle || draft.theoryBody) {
+        return [{
+            ...defaultTheoryBlock('hook'),
+            title: draft.theoryTitle || 'شرح الدرس',
+            body: draft.theoryBody || '',
+        }];
+    }
+
+    return [{
+        ...defaultTheoryBlock('hook'),
+        title: 'شرح الدرس',
+        body: 'أدخل أقسام الشرح من لوحة المعلم.',
+    }];
+}
+
+function theoryBlockText(block) {
+    return [block.title, block.term, block.body, block.result, block.note].filter(Boolean).join('. ');
+}
+
+function youtubeEmbedUrl(url = '') {
+    const value = String(url).trim();
+    if (!value) return '';
+    const match = value.match(/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([A-Za-z0-9_-]{6,})/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : value;
+}
+
+function isPdfSource(value = '') {
+    const source = String(value || '');
+    return source.startsWith('data:application/pdf') || /\.pdf($|\?)/i.test(source);
+}
+
+function subjectTheoryGuide(subjectId) {
+    const guides = {
+        english: {
+            title: 'طريقة مناسبة للإنجليزي',
+            text: 'ابدأ بسؤال قصير، ثم كلمة/صورة، ثم محادثة بخيارات تحت بعض. لا تشرح كثير؛ خلي الطالب يختار ويسمع ويكرر.',
+            chips: ['Question', 'Picture word', 'Conversation', 'Listen'],
+        },
+        arabic: {
+            title: 'طريقة مناسبة للعربي',
+            text: 'ابدأ بتمهيد قراءة، ثم معنى/تعريف، ثم جملة مثال، ثم تلميح قصير. ركز على الفهم والمعنى والسياق.',
+            chips: ['قراءة', 'معنى', 'جملة', 'تذكّر'],
+        },
+        math: {
+            title: 'طريقة مناسبة للحساب',
+            text: 'ابدأ بنموذج بصري، ثم القاعدة، ثم مثال محلول مرقم. الطالب يحتاج يرى: ماذا نعرف؟ ماذا نطبق؟ ما الناتج؟',
+            chips: ['نموذج', 'قاعدة', 'خطوات', 'ناتج'],
+        },
+        science: {
+            title: 'طريقة مناسبة للعلوم',
+            text: 'ابدأ بملاحظة ظاهرة، ثم سؤال لماذا، ثم تفسير أو تجربة، ثم استنتاج. العلم لازم يكون صورة/فيديو/ملاحظة.',
+            chips: ['لاحظ', 'لماذا؟', 'تجربة', 'استنتاج'],
+        },
+    };
+
+    return guides[subjectId] || guides.arabic;
+}
+
+function theoryTypeOptions(subjectId) {
+    const bySubject = {
+        english: [
+            ['hook', 'سؤال تمهيدي'],
+            ['definition', 'كلمة ومعناها'],
+            ['example', 'محادثة / اختيارات'],
+            ['idea', 'قاعدة استعمال'],
+            ['tip', 'ملاحظة نطق'],
+            ['youtube', 'استماع / فيديو'],
+            ['pdf', 'ملف مساعد'],
+        ],
+        arabic: [
+            ['hook', 'تمهيد قراءة'],
+            ['definition', 'تعريف / مصطلح'],
+            ['idea', 'فكرة لغوية'],
+            ['example', 'مثال من جملة'],
+            ['tip', 'تذكّر'],
+            ['youtube', 'فيديو شرح'],
+            ['pdf', 'ورقة قراءة PDF'],
+        ],
+        math: [
+            ['hook', 'نموذج بصري'],
+            ['definition', 'قاعدة / رمز'],
+            ['example', 'مثال محلول خطوة بخطوة'],
+            ['idea', 'فكرة الحل'],
+            ['tip', 'خطأ شائع'],
+            ['youtube', 'فيديو توضيحي'],
+            ['pdf', 'ورقة قوانين PDF'],
+        ],
+        science: [
+            ['hook', 'ملاحظة ظاهرة'],
+            ['definition', 'مفهوم علمي'],
+            ['idea', 'تفسير السبب'],
+            ['example', 'تجربة / تطبيق'],
+            ['tip', 'استنتاج'],
+            ['youtube', 'فيديو تجربة'],
+            ['pdf', 'ملف مختبر PDF'],
+        ],
+    };
+
+    return bySubject[subjectId] || bySubject.arabic;
+}
+
+function theoryFieldLabels(subjectId, type) {
+    const defaults = {
+        emoji: 'الأيقونة',
+        title: 'عنوان البطاقة',
+        body: 'النص الذي تقوله الشخصية',
+        imageUrl: 'صورة أو رسم مساعد',
+        term: 'المصطلح',
+        symbol: 'الرمز',
+        items: 'عناصر تظهر تحت بعض، كل عنصر بسطر أو بفاصلة',
+        result: 'النتيجة / الخلاصة',
+        note: 'ملاحظة قصيرة',
+        url: 'الرابط',
+    };
+
+    const subjectLabels = {
+        english: {
+            hook: { title: 'Question shown to student', body: 'Short prompt', items: 'Answer choices, each on a new line', imageUrl: 'Picture/icon for the prompt' },
+            definition: { term: 'English word', symbol: 'Arabic meaning or tag', body: 'Example sentence', imageUrl: 'Picture for the word' },
+            example: { title: 'Conversation title', body: 'Question or instruction', items: 'Conversation choices, each on a new line', result: 'Correct phrase / model answer', note: 'Pronunciation tip' },
+            idea: { title: 'Grammar/use title', body: 'Simple rule', items: 'Usage examples, each on a new line' },
+            tip: { title: 'Pronunciation note', body: 'What should the student notice?', items: 'Practice phrases' },
+            youtube: { title: 'Listening title', body: 'What should the student listen for?', url: 'YouTube listening link' },
+            pdf: { title: 'Worksheet title', body: 'What should the student review?', url: 'PDF link or uploaded file' },
+        },
+        arabic: {
+            hook: { title: 'تمهيد القراءة', body: 'سؤال أو مدخل قصير', items: 'نقاط قراءة، كل نقطة بسطر' },
+            definition: { term: 'الكلمة أو المصطلح', symbol: 'النوع/الرمز إن وجد', body: 'المعنى أو التعريف', items: 'جمل قصيرة للتوضيح' },
+            example: { title: 'مثال من جملة', body: 'الجملة أو السؤال', items: 'ملاحظات على الجملة، كل ملاحظة بسطر', result: 'الخلاصة' },
+            idea: { title: 'الفكرة اللغوية', body: 'اشرح الفكرة بجملة قصيرة', items: 'أمثلة أو حالات' },
+            tip: { title: 'تذكّر', body: 'قاعدة تذكّر قصيرة', items: 'كلمات مفتاحية' },
+            youtube: { title: 'عنوان الفيديو', body: 'ما الذي يركز عليه الطالب؟', url: 'رابط YouTube' },
+            pdf: { title: 'ورقة قراءة', body: 'تعليمات الملف', url: 'رابط PDF أو الملف المرفق' },
+        },
+        math: {
+            hook: { title: 'النموذج البصري', body: 'ماذا يرى الطالب؟', items: 'المعطيات أو الأجزاء، كل جزء بسطر', imageUrl: 'رسم/صورة للمسألة' },
+            definition: { term: 'اسم القاعدة', symbol: 'الرمز أو القانون', body: 'شرح القاعدة', items: 'متى نستخدمها؟' },
+            example: { title: 'عنوان المثال المحلول', body: 'نص المسألة', items: 'خطوات الحل، كل خطوة بسطر', result: 'الناتج النهائي', note: 'تنبيه أو تحقق' },
+            idea: { title: 'فكرة الحل', body: 'كيف نبدأ؟', items: 'استراتيجية الحل' },
+            tip: { title: 'خطأ شائع', body: 'ما الخطأ؟', items: 'كيف نتجنبه؟' },
+            youtube: { title: 'فيديو توضيحي', body: 'ما الفكرة في الفيديو؟', url: 'رابط YouTube' },
+            pdf: { title: 'ورقة قوانين', body: 'تعليمات للطالب', url: 'رابط PDF أو الملف المرفق' },
+        },
+        science: {
+            hook: { title: 'ملاحظة الظاهرة', body: 'ماذا يلاحظ الطالب؟', items: 'أسئلة ملاحظة، كل سؤال بسطر', imageUrl: 'صورة الظاهرة أو التجربة' },
+            definition: { term: 'المفهوم العلمي', symbol: 'رمز/مصطلح إن وجد', body: 'التعريف العلمي', items: 'أمثلة من الحياة' },
+            idea: { title: 'تفسير السبب', body: 'لماذا يحدث ذلك؟', items: 'أسباب أو مراحل' },
+            example: { title: 'تجربة أو تطبيق', body: 'وصف التجربة', items: 'خطوات التجربة، كل خطوة بسطر', result: 'الاستنتاج', note: 'تنبيه أمان أو ملاحظة' },
+            tip: { title: 'استنتاج', body: 'ماذا يجب أن يتذكر الطالب؟', items: 'كلمات علمية مهمة' },
+            youtube: { title: 'فيديو تجربة', body: 'ما الذي يشاهده الطالب؟', url: 'رابط YouTube' },
+            pdf: { title: 'ملف مختبر', body: 'تعليمات الملف', url: 'رابط PDF أو الملف المرفق' },
+        },
+    };
+
+    return { ...defaults, ...(subjectLabels[subjectId]?.[type] || {}) };
+}
+
+function splitLessonLines(value = '') {
+    const lines = optionList(value);
+    if (lines.length) return lines;
+    return String(value || '')
+        .split(/[.؟!\n]/)
         .map((item) => item.trim())
         .filter(Boolean);
 }
@@ -276,8 +501,9 @@ function createLessonFromTeacherDraft(unitId) {
         title: draft.lessonTitle || 'درس جديد',
         xp: Math.max(10, quizScore || 10),
         theory: {
-            title: draft.theoryTitle || 'شرح الدرس',
-            body: draft.theoryBody || 'اكتب شرح الدرس هنا.',
+            title: draft.theoryTitle || draft.lessonTitle || 'شرح الدرس',
+            body: draft.theoryBody || '',
+            blocks: normalizeTheoryBlocks(draft),
             points: ['اقرأ الشرح جيداً.', 'انتقل للأمثلة.', 'حل ورقة العمل ثم الاختبار.'],
         },
         examples: draft.examples.map((example, index) => ({
@@ -377,8 +603,8 @@ function shell(content) {
         <div class="platform">
             <aside class="sidebar">
                 <button class="brand" data-view="home" aria-label="الرئيسية">
-                    <span class="brand-mark">${icon('star')}</span>
-                    <span>ليرنت</span>
+                    <span class="brand-mark"><img src="/assets/pink-blue-logo.png" alt=""></span>
+                    <span>Pink & Blue</span>
                 </button>
                 <nav class="side-nav" aria-label="Main navigation">
                     ${navButton('home', 'الرئيسية', 'home')}
@@ -456,7 +682,7 @@ function homeView() {
         <section class="dashboard">
             <header class="top-heading">
                 <div>
-                    <h1>أهلاً يا بطل! <span class="wave">👏</span></h1>
+                    <h1>أهلا بك مجددا! <span class="wave">👏</span></h1>
                     <p>اختار صفك ومادتك وابدأ رحلة اليوم.</p>
                 </div>
                 ${statsBar()}
@@ -666,15 +892,208 @@ function renderLessonSection(lesson) {
 }
 
 function renderTheorySection(lesson) {
+    const blocks = lesson.theory.blocks?.length ? lesson.theory.blocks : [{
+        type: 'hook',
+        emoji: '✨',
+        title: lesson.theory.title,
+        body: lesson.theory.body,
+    }];
+    const index = Math.min(state.currentTheoryBlock || 0, blocks.length - 1);
+    const block = blocks[index];
+    const isLast = index >= blocks.length - 1;
+
     return `
         <div class="lesson-stage theory-stage">
-            <span class="stage-kicker">الشرح</span>
-            <h2>${lesson.theory.title}</h2>
-            <p>${lesson.theory.body}</p>
-            <div class="point-cloud">
-                ${lesson.theory.points.map((point) => `<span>${point}</span>`).join('')}
+            <div class="theory-game-head">
+                <span class="stage-kicker">الشرح</span>
+                <div class="theory-progress">
+                    ${blocks.map((_, dotIndex) => `<span class="${dotIndex <= index ? 'is-filled' : ''}"></span>`).join('')}
+                </div>
             </div>
-            <button class="primary-action" data-complete-section="theory">فهمت الشرح</button>
+            ${renderTheoryBlock(block, index)}
+            <footer class="theory-actions">
+                <button class="soft-action" data-theory-prev="true" ${index === 0 ? 'disabled' : ''}>السابق</button>
+                <button class="primary-action" data-theory-next="true">
+                    ${isLast ? 'فهمت الشرح' : 'التالي'}
+                </button>
+            </footer>
+        </div>
+    `;
+}
+
+function renderTheoryBlock(block, index) {
+    const subject = currentSubject();
+    const typeLabel = {
+        hook: 'مقدمة',
+        definition: 'تعريف',
+        idea: 'فكرة',
+        example: 'مثال',
+        tip: 'تلميح',
+        youtube: 'فيديو',
+        pdf: 'PDF',
+    }[block.type] || 'شرح';
+    const items = optionList(block.items);
+    const lines = splitLessonLines(block.items || block.body);
+    const visual = renderTheoryVisual(block, subject);
+    const bodyClass = visual ? 'duo-choice-body has-visual' : 'duo-choice-body no-visual';
+    const speech = block.body || block.note || 'اقرأ هذه الخطوة بهدوء، ثم اضغط التالي.';
+
+    if (block.type === 'youtube') {
+        const embed = youtubeEmbedUrl(block.url);
+        return `
+            <section class="duo-activity-card media-card pop-card" style="--delay:${index * 70}ms;--subject:${subject.color}">
+                <div class="activity-progress"><span style="width:${Math.max(18, (index + 1) * 22)}%"></span></div>
+                <div class="duo-mascot-row compact">
+                    ${mascot('happy')}
+                    <div class="speech-bubble">
+                        <strong>${escapeHtml(block.title || 'فيديو مساعد')}</strong>
+                        ${block.body ? `<span>${escapeHtml(block.body)}</span>` : '<span>شاهد الفيديو ثم كمل.</span>'}
+                    </div>
+                </div>
+                ${embed ? `<iframe class="lesson-media-frame" src="${escapeHtml(embed)}" title="${escapeHtml(block.title || 'فيديو الدرس')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` : '<div class="media-placeholder">أضف رابط YouTube صحيح من لوحة المعلم</div>'}
+            </section>
+        `;
+    }
+
+    if (block.type === 'pdf') {
+        const pdfUrl = block.url || '';
+        return `
+            <section class="duo-activity-card media-card pop-card" style="--delay:${index * 70}ms;--subject:${subject.color}">
+                <div class="activity-progress"><span style="width:${Math.max(18, (index + 1) * 22)}%"></span></div>
+                <div class="duo-mascot-row compact">
+                    ${mascot('read')}
+                    <div class="speech-bubble">
+                        <strong>${escapeHtml(block.title || 'ملف PDF مساعد')}</strong>
+                        ${block.body ? `<span>${escapeHtml(block.body)}</span>` : '<span>افتح الملف المساعد وراجع الفكرة.</span>'}
+                    </div>
+                </div>
+                ${pdfUrl && isPdfSource(pdfUrl) ? `
+                    <object class="lesson-pdf-frame" data="${escapeHtml(pdfUrl)}" type="application/pdf">
+                        <a href="${escapeHtml(pdfUrl)}" target="_blank" rel="noreferrer">فتح ملف PDF</a>
+                    </object>
+                    <a class="open-media-link" href="${escapeHtml(pdfUrl)}" target="_blank" rel="noreferrer">فتح الملف بنافذة جديدة</a>
+                ` : '<div class="media-placeholder">أرفق PDF من الجهاز أو أضف رابط PDF مباشر</div>'}
+            </section>
+        `;
+    }
+
+    return `
+        <section class="duo-activity-card theory-${block.type || 'hook'} pop-card" style="--delay:${index * 70}ms;--subject:${subject.color}">
+            <div class="activity-progress"><span style="width:${Math.max(18, (index + 1) * 22)}%"></span></div>
+            <div class="duo-mascot-row compact">
+                ${mascot(block.type === 'tip' ? 'happy' : 'think')}
+                <div class="speech-bubble">
+                    <strong>${escapeHtml(block.title || block.term || 'شرح الدرس')}</strong>
+                    <span>${escapeHtml(speech)}</span>
+                </div>
+            </div>
+            <div class="${bodyClass}">
+                ${visual}
+                ${renderSubjectLessonContent(block, subject, lines, items)}
+            </div>
+        </section>
+    `;
+}
+
+function renderSubjectLessonContent(block, subject, lines, items) {
+    const result = block.result || block.note ? `
+        <div class="result-note">
+            ${block.result ? `<strong>${escapeHtml(block.result)}</strong>` : ''}
+            ${block.note ? `<small>${escapeHtml(block.note)}</small>` : ''}
+        </div>
+    ` : '';
+
+    if (subject.id === 'english') {
+        const options = (items.length ? items : lines).slice(0, 6);
+        return `
+            <div class="duo-content-panel english-panel">
+                <div class="english-conversation-label">Conversation</div>
+                <div class="english-option-stack">
+                    ${(options.length ? options : ['Listen and repeat', 'Choose the picture', 'Use it in a sentence']).map((item, index) => `
+                        <div>
+                            <i>${['🗣️', '🎧', '🧩', '📝', '⭐', '✅'][index] || '✅'}</i>
+                            <span>${escapeHtml(item)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                ${result}
+            </div>
+        `;
+    }
+
+    if (subject.id === 'math') {
+        return `
+            <div class="duo-content-panel math-panel">
+                ${block.type === 'definition' && (block.term || block.symbol) ? `
+                    <div class="definition-tile math-rule">
+                        <small>قاعدة / رمز</small>
+                        <strong>${escapeHtml(block.term || 'قاعدة')}</strong>
+                        ${block.symbol ? `<b>${escapeHtml(block.symbol)}</b>` : ''}
+                    </div>
+                ` : ''}
+                <div class="math-step-stack">
+                    ${(lines.length ? lines : ['اكتب المعطيات', 'طبّق القاعدة', 'تحقق من الناتج']).slice(0, 5).map((line, index) => `
+                        <div><b>${index + 1}</b><span>${escapeHtml(line)}</span></div>
+                    `).join('')}
+                </div>
+                ${result}
+            </div>
+        `;
+    }
+
+    if (subject.id === 'science') {
+        return `
+            <div class="duo-content-panel science-panel">
+                <div class="science-observation">
+                    <strong>لاحظ ثم استنتج</strong>
+                    <span>${escapeHtml(block.term || block.title || 'تجربة قصيرة')}</span>
+                </div>
+                <div class="science-observation-stack">
+                    ${(lines.length ? lines : ['ماذا ترى؟', 'ما السبب؟', 'ما الاستنتاج؟']).slice(0, 4).map((line, index) => `
+                        <div><i>${['🔎', '🧪', '🌱', '✅'][index] || '✅'}</i><span>${escapeHtml(line)}</span></div>
+                    `).join('')}
+                </div>
+                ${result}
+            </div>
+        `;
+    }
+
+    return `
+        <div class="duo-content-panel arabic-panel">
+            ${block.type === 'definition' && (block.term || block.symbol) ? `
+                <div class="definition-tile">
+                    <small>مصطلح اليوم</small>
+                    <strong>${escapeHtml(block.term || 'مصطلح')}</strong>
+                    ${block.symbol ? `<b>${escapeHtml(block.symbol)}</b>` : ''}
+                </div>
+            ` : ''}
+            <div class="arabic-reading-card">
+                ${(lines.length ? lines : ['اقرأ الفكرة', 'لاحظ المثال', 'احفظ التلميح']).slice(0, 4).map((line, index) => `
+                    <div><i>${['📖', '✏️', '💡', '⭐'][index] || '✅'}</i><span>${escapeHtml(line)}</span></div>
+                `).join('')}
+            </div>
+            ${result}
+        </div>
+    `;
+}
+
+function renderTheoryVisual(block, subject) {
+    if (block.imageUrl) {
+        return `
+            <figure class="duo-visual image-visual">
+                <img src="${escapeHtml(block.imageUrl)}" alt="">
+            </figure>
+        `;
+    }
+
+    return '';
+}
+
+function mascot(mood = 'happy') {
+    return `
+        <div class="mascot mascot-${mood}" aria-hidden="true">
+            <span class="mascot-head"><i></i><b></b></span>
+            <span class="mascot-body"></span>
         </div>
     `;
 }
@@ -733,6 +1152,8 @@ function renderQuestionSection(lesson, section) {
 function teacherDashboardView() {
     const units = unitsForSelection();
     const draft = state.teacherDraft;
+    const theoryGuide = subjectTheoryGuide(draft.subject);
+    const typeOptions = theoryTypeOptions(draft.subject);
     const draftGrade = Number(draft.grade || 1);
     const draftUnitNo = Math.max(1, Math.min(9, Number(draft.unitNo || 1)));
     const draftUnits = allLearningUnits().filter((unit) => unit.grade === draftGrade && unit.subject === draft.subject);
@@ -817,15 +1238,36 @@ function teacherDashboardView() {
                         <span>اختبار قصير</span>
                     </div>
                     <label>عنوان الدرس <input data-teacher-field="lessonTitle" value="${escapeHtml(draft.lessonTitle)}"></label>
-                    <label>عنوان الشرح <input data-teacher-field="theoryTitle" value="${escapeHtml(draft.theoryTitle)}"></label>
-                    <label>الشرح <textarea data-teacher-field="theoryBody" rows="4">${escapeHtml(draft.theoryBody)}</textarea></label>
                 </section>
             </div>
+
+            <section class="teacher-builder-card theory-builder-card">
+                <div class="builder-head">
+                    <div>
+                        <h2>4. بناء الشرح</h2>
+                        <p class="teacher-hint">اختار نوع كل جزء من الشرح: فكرة، تعريف، مثال، تلميح، فيديو YouTube أو ملف PDF. الطالب سيشاهده خطوة بخطوة مثل لعبة.</p>
+                    </div>
+                    <div class="add-theory-actions">
+                        <select data-theory-add-select="true" aria-label="نوع قسم الشرح">
+                            ${typeOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join('')}
+                        </select>
+                        <button type="button" data-add-theory-block="true">+ قسم شرح</button>
+                    </div>
+                </div>
+                <div class="subject-guide-card">
+                    <strong>${theoryGuide.title}</strong>
+                    <p>${theoryGuide.text}</p>
+                    <div>${theoryGuide.chips.map((chip) => `<span>${chip}</span>`).join('')}</div>
+                </div>
+                <div class="theory-editor-list">
+                    ${(draft.theoryBlocks?.length ? draft.theoryBlocks : [defaultTheoryBlock('hook')]).map((block, index) => theoryBlockEditor(block, index)).join('')}
+                </div>
+            </section>
 
             <section class="teacher-builder-grid">
                 <article class="teacher-builder-card">
                     <div class="builder-head">
-                        <h2>4. الأمثلة</h2>
+                        <h2>5. الأمثلة</h2>
                         <button type="button" data-add-teacher-row="examples">+ مثال</button>
                     </div>
                     <p class="teacher-hint">العنوان والشرح والحل اختياريين، ويمكن إضافة أمثلة بعدد مفتوح.</p>
@@ -840,7 +1282,7 @@ function teacherDashboardView() {
 
                 <article class="teacher-builder-card">
                     <div class="builder-head">
-                        <h2>5. ورقة العمل</h2>
+                        <h2>6. ورقة العمل</h2>
                         <button type="button" data-add-teacher-row="worksheet">+ سؤال</button>
                     </div>
                     ${draft.worksheet.map((item, index) => teacherQuestionEditor('worksheet', item, index, false)).join('')}
@@ -848,7 +1290,7 @@ function teacherDashboardView() {
 
                 <article class="teacher-builder-card">
                     <div class="builder-head">
-                        <h2>6. الاختبار القصير</h2>
+                        <h2>7. الاختبار القصير</h2>
                         <button type="button" data-add-teacher-row="quiz">+ سؤال</button>
                     </div>
                     <p class="teacher-hint">كل سؤال في الاختبار له سكور، ومجموع السكور يتحول إلى XP للدرس.</p>
@@ -858,7 +1300,7 @@ function teacherDashboardView() {
 
             <div class="teacher-save-row">
                 <button class="primary-action" type="button" data-save-teacher-unit="true">حفظ الوحدة وإظهارها للطالب</button>
-                <button class="teacher-open-btn" type="button" data-reset-teacher-draft="true">إرجاع الداتا الوهمية</button>
+                <button class="teacher-open-btn" type="button" data-reset-teacher-draft="true">تفريغ النموذج</button>
             </div>
 
             <section class="teacher-unit-preview">
@@ -881,6 +1323,110 @@ function teacherQuestionEditor(listName, item, index, withScore) {
             <label>الخيارات <input data-teacher-list="${listName}" data-index="${index}" data-field="options" value="${escapeHtml(item.options)}"></label>
             <label>الإجابة الصحيحة <input data-teacher-list="${listName}" data-index="${index}" data-field="answer" value="${escapeHtml(item.answer)}"></label>
             ${withScore ? `<label>السكور <input type="number" min="1" data-teacher-list="${listName}" data-index="${index}" data-field="score" value="${escapeHtml(item.score || 1)}"></label>` : ''}
+        </div>
+    `;
+}
+
+function theoryBlockEditor(block, index) {
+    const current = { ...defaultTheoryBlock(block.type || 'hook'), ...block };
+    const typeNames = Object.fromEntries(theoryTypeOptions(state.teacherDraft.subject));
+    const labels = theoryFieldLabels(state.teacherDraft.subject, current.type);
+    const needsTerm = current.type === 'definition';
+    const needsItems = ['hook', 'definition', 'example', 'idea', 'tip'].includes(current.type);
+    const needsResult = ['example', 'idea', 'tip'].includes(current.type);
+    const needsUrl = ['youtube', 'pdf'].includes(current.type);
+    const needsImage = !['youtube', 'pdf'].includes(current.type);
+    const imageLabel = labels.imageUrl;
+
+    return `
+        <article class="theory-edit-card">
+            <header>
+                <strong>${index + 1}. ${typeNames[current.type] || 'شرح'}</strong>
+                <button type="button" data-remove-theory-block="${index}" ${index === 0 ? 'disabled' : ''}>حذف</button>
+            </header>
+            <div class="teacher-repeat-row compact">
+                <label>
+                    النوع
+                    <select data-theory-block="${index}" data-field="type">
+                        ${Object.entries(typeNames).map(([value, label]) => `
+                            <option value="${value}" ${current.type === value ? 'selected' : ''}>${label}</option>
+                        `).join('')}
+                    </select>
+                </label>
+                <label>${labels.emoji} <input data-theory-block="${index}" data-field="emoji" value="${escapeHtml(current.emoji)}"></label>
+                <label>${labels.title} <input data-theory-block="${index}" data-field="title" value="${escapeHtml(current.title)}"></label>
+                ${needsTerm ? `
+                    <label>${labels.term} <input data-theory-block="${index}" data-field="term" value="${escapeHtml(current.term)}"></label>
+                    <label>${labels.symbol} <input data-theory-block="${index}" data-field="symbol" value="${escapeHtml(current.symbol)}" placeholder="Ω / ح / ="></label>
+                ` : ''}
+                <label>
+                    ${labels.body}
+                    <textarea data-theory-block="${index}" data-field="body" rows="3">${escapeHtml(current.body)}</textarea>
+                </label>
+                ${needsImage ? `
+                    <label>
+                        ${imageLabel}
+                        <input data-theory-block="${index}" data-field="imageUrl" value="${escapeHtml(current.imageUrl)}" placeholder="رابط صورة اختياري">
+                    </label>
+                    <label>
+                        إرفاق صورة من الجهاز
+                        <input type="file" accept="image/*" data-theory-file="${index}" data-file-field="imageUrl">
+                    </label>
+                    <div class="image-search-box">
+                        <label>
+                            بحث صور Pixabay
+                            <input data-image-query="${index}" value="${state.imageSearch?.blockIndex === index ? escapeHtml(state.imageSearch.query) : ''}" placeholder="مثال: solar system, apple, fractions">
+                        </label>
+                        <button type="button" data-search-images="${index}">بحث</button>
+                        ${renderImageSearchResults(index)}
+                    </div>
+                ` : ''}
+                ${needsItems ? `
+                    <label>
+                        ${labels.items}
+                        <textarea data-theory-block="${index}" data-field="items" rows="3" placeholder="كل عنصر بسطر منفصل">${escapeHtml(current.items)}</textarea>
+                    </label>
+                ` : ''}
+                ${needsResult ? `
+                    <label>${labels.result} <input data-theory-block="${index}" data-field="result" value="${escapeHtml(current.result)}"></label>
+                    <label>${labels.note} <input data-theory-block="${index}" data-field="note" value="${escapeHtml(current.note)}"></label>
+                ` : ''}
+                ${needsUrl ? `
+                    <label>
+                        ${labels.url}
+                        <input data-theory-block="${index}" data-field="url" value="${escapeHtml(current.url)}" placeholder="${current.type === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'https://example.com/file.pdf'}">
+                    </label>
+                    ${current.type === 'pdf' ? `
+                        <label>
+                            إرفاق PDF من الجهاز
+                            <input type="file" accept="application/pdf" data-theory-file="${index}" data-file-field="url">
+                        </label>
+                        ${current.fileName ? `<p class="attached-file-name">تم الإرفاق: ${escapeHtml(current.fileName)}</p>` : ''}
+                    ` : ''}
+                ` : ''}
+            </div>
+        </article>
+    `;
+}
+
+function renderImageSearchResults(index) {
+    const search = state.imageSearch || {};
+    if (search.blockIndex !== index) return '';
+
+    if (search.message) {
+        return `<p class="image-search-message">${escapeHtml(search.message)}</p>`;
+    }
+
+    if (!search.results?.length) return '';
+
+    return `
+        <div class="image-result-grid">
+            ${search.results.map((image) => `
+                <button type="button" data-pick-image="${index}" data-image-url="${escapeHtml(image.webformatURL || image.previewURL)}">
+                    <img src="${escapeHtml(image.previewURL || image.webformatURL)}" alt="">
+                    <span>إدراج</span>
+                </button>
+            `).join('')}
         </div>
     `;
 }
@@ -988,11 +1534,53 @@ app.addEventListener('click', (event) => {
             state.teacherDraft.examples.push({ title: '', body: '', answer: '' });
         }
         if (list === 'worksheet') {
-            state.teacherDraft.worksheet.push({ question: '', options: 'خيار 1، خيار 2، خيار 3', answer: 'خيار 1' });
+            state.teacherDraft.worksheet.push({ question: '', options: '', answer: '' });
         }
         if (list === 'quiz') {
-            state.teacherDraft.quiz.push({ question: '', options: 'خيار 1، خيار 2، خيار 3', answer: 'خيار 1', score: 1 });
+            state.teacherDraft.quiz.push({ question: '', options: '', answer: '', score: 1 });
         }
+        saveState();
+        render();
+        return;
+    }
+
+    if (button.dataset.addTheoryBlock) {
+        const selectedType = document.querySelector('[data-theory-add-select]')?.value || 'hook';
+        if (!Array.isArray(state.teacherDraft.theoryBlocks)) state.teacherDraft.theoryBlocks = [];
+        state.teacherDraft.theoryBlocks.push(defaultTheoryBlock(selectedType));
+        saveState();
+        render();
+        return;
+    }
+
+    if (button.dataset.removeTheoryBlock) {
+        const index = Number(button.dataset.removeTheoryBlock);
+        if (Array.isArray(state.teacherDraft.theoryBlocks) && state.teacherDraft.theoryBlocks.length > 1) {
+            state.teacherDraft.theoryBlocks.splice(index, 1);
+            saveState();
+            render();
+        }
+        return;
+    }
+
+    if (button.dataset.searchImages) {
+        const index = Number(button.dataset.searchImages);
+        const query = document.querySelector(`[data-image-query="${index}"]`)?.value?.trim() || '';
+        state.imageSearch = { blockIndex: index, query, results: [], message: 'جاري البحث...' };
+        render();
+        searchPixabayImages(index, query);
+        return;
+    }
+
+    if (button.dataset.pickImage) {
+        const index = Number(button.dataset.pickImage);
+        const url = button.dataset.imageUrl || '';
+        if (!Array.isArray(state.teacherDraft.theoryBlocks)) state.teacherDraft.theoryBlocks = [defaultTheoryBlock('hook')];
+        state.teacherDraft.theoryBlocks[index] = {
+            ...(state.teacherDraft.theoryBlocks[index] || defaultTheoryBlock('hook')),
+            imageUrl: url,
+        };
+        state.imageSearch = { blockIndex: null, query: '', results: [], message: '' };
         saveState();
         render();
         return;
@@ -1046,6 +1634,7 @@ app.addEventListener('click', (event) => {
         state.selectedAnswer = '';
         state.lastResult = '';
         state.currentQuestion = 0;
+        state.currentTheoryBlock = 0;
         state.view = 'learn';
         saveState();
         render();
@@ -1066,10 +1655,35 @@ app.addEventListener('click', (event) => {
     if (button.dataset.section) {
         state.lessonSection = button.dataset.section;
         state.currentQuestion = 0;
+        state.currentTheoryBlock = 0;
         state.selectedAnswer = '';
         state.lastResult = '';
         saveState();
         render();
+        return;
+    }
+
+    if (button.dataset.theoryPrev) {
+        state.currentTheoryBlock = Math.max(0, Number(state.currentTheoryBlock || 0) - 1);
+        saveState();
+        render();
+        return;
+    }
+
+    if (button.dataset.theoryNext) {
+        const lesson = currentLesson();
+        const blocks = lesson?.theory?.blocks?.length ? lesson.theory.blocks : [lesson?.theory || {}];
+        const current = Number(state.currentTheoryBlock || 0);
+        if (current < blocks.length - 1) {
+            state.currentTheoryBlock = current + 1;
+        } else {
+            markSectionDone('theory');
+            state.lessonSection = 'examples';
+            state.currentTheoryBlock = 0;
+        }
+        saveState();
+        render();
+        scrollMainTop();
         return;
     }
 
@@ -1141,8 +1755,10 @@ app.addEventListener('click', (event) => {
 
     if (button.dataset.speakCurrent) {
         const lesson = currentLesson();
+        const blocks = lesson?.theory?.blocks || [];
+        const activeTheoryBlock = blocks[Math.min(Number(state.currentTheoryBlock || 0), Math.max(0, blocks.length - 1))];
         const text = state.lessonSection === 'theory'
-            ? `${lesson.theory.title}. ${lesson.theory.body}`
+            ? theoryBlockText(activeTheoryBlock || lesson.theory)
             : state.lessonSection === 'examples'
                 ? lesson.examples.map((example) => `${example.title}. ${example.prompt}. ${example.steps.join('. ')}`).join('. ')
                 : (lesson[state.lessonSection][state.currentQuestion]?.question || lesson.title);
@@ -1197,13 +1813,89 @@ function updateTeacherDraft(target) {
         row[field] = field === 'score' ? Number(target.value || 1) : target.value;
         saveState();
     }
+
+    if (target.dataset.theoryBlock) {
+        const index = Number(target.dataset.theoryBlock);
+        const field = target.dataset.field;
+        if (!Array.isArray(state.teacherDraft.theoryBlocks)) state.teacherDraft.theoryBlocks = [defaultTheoryBlock('hook')];
+        const current = state.teacherDraft.theoryBlocks[index] || defaultTheoryBlock('hook');
+        if (field === 'type') {
+            state.teacherDraft.theoryBlocks[index] = {
+                ...defaultTheoryBlock(target.value),
+                ...current,
+                type: target.value,
+                emoji: current.emoji || defaultTheoryBlock(target.value).emoji,
+                title: current.title || defaultTheoryBlock(target.value).title,
+            };
+        } else {
+            state.teacherDraft.theoryBlocks[index] = { ...current, [field]: target.value };
+        }
+        saveState();
+        if (field === 'type') render();
+    }
+}
+
+function handleTeacherFile(target) {
+    if (!(target instanceof HTMLInputElement) || !target.dataset.theoryFile || !target.files?.[0]) return false;
+    const index = Number(target.dataset.theoryFile);
+    const field = target.dataset.fileField || 'url';
+    const file = target.files[0];
+    if (!Array.isArray(state.teacherDraft.theoryBlocks)) state.teacherDraft.theoryBlocks = [defaultTheoryBlock('hook')];
+    const current = state.teacherDraft.theoryBlocks[index] || defaultTheoryBlock('hook');
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        state.teacherDraft.theoryBlocks[index] = {
+            ...current,
+            [field]: reader.result,
+            fileName: file.name,
+        };
+        saveState();
+        render();
+    };
+
+    reader.readAsDataURL(file);
+    return true;
+}
+
+async function searchPixabayImages(index, query) {
+    try {
+        const response = await fetch(`/api/images?q=${encodeURIComponent(query || 'education illustration')}`);
+        const data = await response.json();
+        state.imageSearch = {
+            blockIndex: index,
+            query,
+            results: Array.isArray(data.hits) ? data.hits.slice(0, 8) : [],
+            message: data.message || (data.hits?.length ? '' : 'لا توجد نتائج. جرّب كلمة بحث أو أضف PIXABAY_KEY في ملف .env.'),
+        };
+    } catch {
+        state.imageSearch = {
+            blockIndex: index,
+            query,
+            results: [],
+            message: 'تعذر البحث الآن. تأكد من إعداد Pixabay API.',
+        };
+    }
+
+    render();
 }
 
 app.addEventListener('input', (event) => {
+    if (event.target instanceof HTMLElement && event.target.dataset.imageQuery) {
+        const index = Number(event.target.dataset.imageQuery);
+        state.imageSearch = {
+            ...(state.imageSearch || {}),
+            blockIndex: index,
+            query: event.target.value,
+        };
+        return;
+    }
+
     updateTeacherDraft(event.target);
 });
 
 app.addEventListener('change', (event) => {
+    if (handleTeacherFile(event.target)) return;
     updateTeacherDraft(event.target);
 });
 
