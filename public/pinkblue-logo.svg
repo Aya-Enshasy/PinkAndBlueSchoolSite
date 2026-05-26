@@ -1,0 +1,25 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220" role="img" aria-label="Pink and Blue Logo">
+  <defs>
+    <linearGradient id="pink" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#db2777"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" x2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="190" cy="78" r="62" fill="none" stroke="url(#pink)" stroke-width="14"/>
+  <circle cx="315" cy="78" r="62" fill="none" stroke="url(#blue)" stroke-width="14"/>
+  <circle cx="170" cy="70" r="7" fill="#db2777"/>
+  <circle cx="210" cy="70" r="7" fill="#db2777"/>
+  <circle cx="295" cy="70" r="7" fill="#1d4ed8"/>
+  <circle cx="335" cy="70" r="7" fill="#1d4ed8"/>
+  <path d="M160 100 C180 118, 200 118, 220 100" fill="none" stroke="#db2777" stroke-width="7" stroke-linecap="round"/>
+  <path d="M285 100 C305 118, 325 118, 345 100" fill="none" stroke="#1d4ed8" stroke-width="7" stroke-linecap="round"/>
+
+  <text x="130" y="185" font-family="Trebuchet MS, Arial, sans-serif" font-size="64" fill="#db2777" font-weight="700">Pink</text>
+  <text x="275" y="185" font-family="Trebuchet MS, Arial, sans-serif" font-size="64" fill="#111827" font-weight="700">&amp;</text>
+  <text x="340" y="185" font-family="Trebuchet MS, Arial, sans-serif" font-size="64" fill="#1d4ed8" font-weight="700">Blue</text>
+</svg>

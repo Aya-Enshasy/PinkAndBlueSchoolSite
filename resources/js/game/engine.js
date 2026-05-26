@@ -169,13 +169,13 @@ export class GameEngine {
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '900 12px Tajawal, sans-serif';
+            ctx.font = '700 12px Calibri, "Segoe UI", sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('LEVEL', pos.x, pos.y - 8);
-            ctx.font = '900 24px Tajawal, sans-serif';
+            ctx.font = '700 24px Calibri, "Segoe UI", sans-serif';
             ctx.fillText(String(node.level), pos.x, pos.y + 15);
 
-            ctx.font = '700 14px Tajawal, sans-serif';
+            ctx.font = '500 14px Calibri, "Segoe UI", sans-serif';
             ctx.fillText(node.title.slice(0, 14), pos.x, pos.y + 52);
         });
     }
@@ -188,7 +188,7 @@ export class GameEngine {
         ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#1f2445';
-        ctx.font = '16px sans-serif';
+        ctx.font = '500 16px Calibri, "Segoe UI", sans-serif';
         ctx.fillText('🙂', pos.x, pos.y + 5);
     }
 
@@ -252,4 +252,3 @@ export class GameEngine {
         this.onOpenUnit?.(node.unitId);
     }
 }
-

@@ -14,6 +14,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body>
-        <div id="app" class="app-shell" aria-live="polite"></div>
+        <div id="app" class="app-shell" data-initial-view="{{ $initialView ?? 'student' }}" aria-live="polite"></div>
     </body>
 </html>

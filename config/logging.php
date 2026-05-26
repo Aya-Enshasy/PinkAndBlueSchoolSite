@@ -105,6 +105,28 @@ return [
             'processors' => [PsrLogMessageProcessor::class],
         ],
 
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => env('SECURITY_LOG_LEVEL', 'info'),
+            'days' => env('SECURITY_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        'image_uploads' => [
+            'driver' => 'stack',
+            'channels' => ['stderr', 'image_uploads_file'],
+            'ignore_exceptions' => false,
+        ],
+
+        'image_uploads_file' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/image_uploads.log'),
+            'level' => env('IMAGE_UPLOAD_LOG_LEVEL', 'info'),
+            'days' => env('IMAGE_UPLOAD_LOG_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),

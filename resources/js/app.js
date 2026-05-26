@@ -1,6 +1,12 @@
 import './bootstrap';
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+Alpine.start();
 
 const app = document.querySelector('#app');
+
+if (app) {
 const STORAGE_KEY = 'pink-blue-school-state-v7';
 
 const subjects = [
@@ -27,7 +33,20 @@ const gradeShortNames = ['الأول', 'الثاني', 'الثالث', 'الرا
 const learningUnits = [];
 
 const state = loadState();
+applyInitialRoute();
 recordVisit();
+
+function applyInitialRoute() {
+    const initialView = app.dataset.initialView || 'student';
+
+    if (initialView === 'teacher') {
+        state.view = 'learn';
+        state.teacherPanel = true;
+        return;
+    }
+
+    state.teacherPanel = false;
+}
 
 function loadState() {
     try {
@@ -1922,3 +1941,4 @@ app.addEventListener('change', (event) => {
 });
 
 render();
+}
