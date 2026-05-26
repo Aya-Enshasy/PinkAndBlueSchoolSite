@@ -55,7 +55,7 @@ function loadState() {
             lastResult: '',
             currentQuestion: 0,
             currentTheoryBlock: Number(saved?.currentTheoryBlock || 0),
-            imageSearch: { blockIndex: null, query: '', results: [], message: '' },
+            imageSearch: { blockIndex: null, query: '', type: 'vector', results: [], message: '' },
             teacherPanel: false,
         };
     } catch {
@@ -81,7 +81,7 @@ function loadState() {
             lastResult: '',
             currentQuestion: 0,
             currentTheoryBlock: 0,
-            imageSearch: { blockIndex: null, query: '', results: [], message: '' },
+            imageSearch: { blockIndex: null, query: '', type: 'vector', results: [], message: '' },
             teacherPanel: false,
         };
     }
@@ -204,8 +204,7 @@ function allLearningUnits() {
 
 function unitsForSelection() {
     const units = allLearningUnits();
-    const exact = units.filter((unit) => unit.subject === state.subject && unit.grade === state.grade);
-    return exact.length ? exact : units.filter((unit) => unit.subject === state.subject);
+    return units.filter((unit) => unit.subject === state.subject && Number(unit.grade) === Number(state.grade));
 }
 
 function currentUnit() {
@@ -1372,14 +1371,22 @@ function theoryBlockEditor(block, index) {
                         إرفاق صورة من الجهاز
                         <input type="file" accept="image/*" data-theory-file="${index}" data-file-field="imageUrl">
                     </label>
-                    <div class="image-search-box">
-                        <label>
-                            بحث صور Pixabay
-                            <input data-image-query="${index}" value="${state.imageSearch?.blockIndex === index ? escapeHtml(state.imageSearch.query) : ''}" placeholder="مثال: solar system, apple, fractions">
-                        </label>
-                        <button type="button" data-search-images="${index}">بحث</button>
-                        ${renderImageSearchResults(index)}
-                    </div>
+                <div class="image-search-box">
+                    <label>
+                        بحث صور Pixabay
+                        <input data-image-query="${index}" value="${state.imageSearch?.blockIndex === index ? escapeHtml(state.imageSearch.query) : ''}" placeholder="مثال: solar system, apple, fractions">
+                    </label>
+                    <label>
+                        نوع الصور
+                        <select data-image-type="${index}">
+                            <option value="vector" ${state.imageSearch?.type !== 'illustration' && state.imageSearch?.type !== 'photo' ? 'selected' : ''}>Vector / رسومات</option>
+                            <option value="illustration" ${state.imageSearch?.type === 'illustration' ? 'selected' : ''}>Illustration</option>
+                            <option value="photo" ${state.imageSearch?.type === 'photo' ? 'selected' : ''}>Photo</option>
+                        </select>
+                    </label>
+                    <button type="button" data-search-images="${index}">بحث</button>
+                    ${renderImageSearchResults(index)}
+                </div>
                 ` : ''}
                 ${needsItems ? `
                     <label>
@@ -1565,10 +1572,12 @@ app.addEventListener('click', (event) => {
 
     if (button.dataset.searchImages) {
         const index = Number(button.dataset.searchImages);
-        const query = document.querySelector(`[data-image-query="${index}"]`)?.value?.trim() || '';
-        state.imageSearch = { blockIndex: index, query, results: [], message: 'جاري البحث...' };
+        const search = state.imageSearch?.blockIndex === index ? state.imageSearch : {};
+        const query = String(search.query || '').trim();
+        const type = search.type || 'vector';
+        state.imageSearch = { blockIndex: index, query, type, results: [], message: 'جاري البحث...' };
         render();
-        searchPixabayImages(index, query);
+        searchPixabayImages(index, query, type);
         return;
     }
 
@@ -1580,7 +1589,7 @@ app.addEventListener('click', (event) => {
             ...(state.teacherDraft.theoryBlocks[index] || defaultTheoryBlock('hook')),
             imageUrl: url,
         };
-        state.imageSearch = { blockIndex: null, query: '', results: [], message: '' };
+        state.imageSearch = { blockIndex: null, query: '', type: 'vector', results: [], message: '' };
         saveState();
         render();
         return;
@@ -1858,20 +1867,23 @@ function handleTeacherFile(target) {
     return true;
 }
 
-async function searchPixabayImages(index, query) {
+async function searchPixabayImages(index, query, type = 'vector') {
     try {
-        const response = await fetch(`/api/images?q=${encodeURIComponent(query || 'education illustration')}`);
+        const response = await fetch(`/api/images?q=${encodeURIComponent(query || 'education illustration')}&type=${encodeURIComponent(type)}`);
         const data = await response.json();
+        const hits = Array.isArray(data.hits) ? data.hits : [];
         state.imageSearch = {
             blockIndex: index,
             query,
-            results: Array.isArray(data.hits) ? data.hits.slice(0, 8) : [],
-            message: data.message || (data.hits?.length ? '' : 'لا توجد نتائج. جرّب كلمة بحث أو أضف PIXABAY_KEY في ملف .env.'),
+            type,
+            results: hits.slice(0, 8),
+            message: data.message || (hits.length ? '' : 'لا توجد نتائج مناسبة. جرّب كلمة إنجليزية مثل: alphabet, fractions, solar system.'),
         };
     } catch {
         state.imageSearch = {
             blockIndex: index,
             query,
+            type,
             results: [],
             message: 'تعذر البحث الآن. تأكد من إعداد Pixabay API.',
         };
@@ -1887,6 +1899,16 @@ app.addEventListener('input', (event) => {
             ...(state.imageSearch || {}),
             blockIndex: index,
             query: event.target.value,
+        };
+        return;
+    }
+
+    if (event.target instanceof HTMLElement && event.target.dataset.imageType) {
+        const index = Number(event.target.dataset.imageType);
+        state.imageSearch = {
+            ...(state.imageSearch || {}),
+            blockIndex: index,
+            type: event.target.value,
         };
         return;
     }

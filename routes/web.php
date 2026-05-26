@@ -23,6 +23,9 @@ Route::post('/api/save-progress', function (Request $request) {
 
 Route::get('/api/images', function (Request $request) {
     $query = trim((string) $request->query('q', 'education'));
+    $type = in_array($request->query('type'), ['vector', 'illustration', 'photo'], true)
+        ? $request->query('type')
+        : 'vector';
     $key = env('PIXABAY_KEY');
 
     if (!$key) {
@@ -34,10 +37,12 @@ Route::get('/api/images', function (Request $request) {
 
     $response = Http::timeout(8)->get('https://pixabay.com/api/', [
         'key' => $key,
-        'q' => $query,
-        'image_type' => 'illustration',
+        'q' => trim($query.' cartoon vector'),
+        'lang' => 'en',
+        'image_type' => $type,
+        'order' => 'popular',
         'safesearch' => 'true',
-        'per_page' => 12,
+        'per_page' => 24,
     ]);
 
     return response()->json($response->json());
