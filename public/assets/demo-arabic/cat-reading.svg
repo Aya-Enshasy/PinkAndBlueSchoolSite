@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-label="cat reading">
+  <rect width="720" height="520" rx="42" fill="#f3fbff"/>
+  <circle cx="560" cy="118" r="78" fill="#ffe1ef"/>
+  <circle cx="142" cy="410" r="95" fill="#dff7ed"/>
+  <g transform="translate(250 84)">
+    <ellipse cx="150" cy="324" rx="178" ry="32" fill="#d8e3ee"/>
+    <path d="M78 140 45 78l70 28c22-10 46-15 72-15 93 0 168 67 168 150s-75 150-168 150S19 324 19 241c0-38 16-73 42-100z" fill="#ffb14a"/>
+    <path d="m237 105 72-29-35 65z" fill="#ffb14a"/>
+    <path d="M85 141 55 93l57 26zm157-22 58-23-28 47z" fill="#cc7830"/>
+    <circle cx="126" cy="222" r="22" fill="#fff"/>
+    <circle cx="225" cy="222" r="22" fill="#fff"/>
+    <circle cx="132" cy="225" r="11" fill="#26324a"/>
+    <circle cx="219" cy="225" r="11" fill="#26324a"/>
+    <path d="M168 248c14 10 30 10 45 0" fill="none" stroke="#8b3f27" stroke-width="9" stroke-linecap="round"/>
+    <path d="M25 284c-44 16-25 84 30 75 38-6 60-37 84-69" fill="none" stroke="#cc7830" stroke-width="28" stroke-linecap="round"/>
+    <g transform="translate(90 280)">
+      <path d="M0 0h170c13 0 24 11 24 24v80H24c-13 0-24-11-24-24z" fill="#1cb0f6"/>
+      <path d="M28 24h138v58H28z" fill="#fff"/>
+      <path d="M28 24h138" stroke="#d9e6f2" stroke-width="8"/>
+    </g>
+  </g>
+</svg>

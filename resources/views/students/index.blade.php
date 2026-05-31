@@ -36,6 +36,7 @@
                         <th class="p-3 text-right">السنة الدراسية</th>
                         <th class="p-3 text-right">هوية الطالب</th>
                         <th class="p-3 text-right">الجوال</th>
+                        <th class="p-3 text-right">تقدم المنصة</th>
                         <th class="p-3"></th>
                     </tr>
                 </thead>
@@ -47,6 +48,20 @@
                             <td class="p-3">{{ $student->academic_year }}</td>
                             <td class="p-3">{{ $student->student_id_number }}</td>
                             <td class="p-3">{{ $student->mobile_number }}</td>
+                            <td class="p-3">
+                                <div class="min-w-36">
+                                    <div class="flex justify-between text-xs text-slate-500 mb-1">
+                                        <span>{{ (int) ($student->learning_xp ?? 0) }} XP</span>
+                                        <span>{{ (int) ($student->completed_lessons_count ?? 0) }} مكتمل</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <span class="block h-full bg-sky-500" style="width: {{ $student->latestProgress?->progress_percent ?? 0 }}%"></span>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-1">
+                                        {{ $student->latestProgress?->lesson_title ?? 'لا يوجد نشاط بعد' }}
+                                    </p>
+                                </div>
+                            </td>
                             <td class="p-3">
                                 <div class="flex gap-2 justify-end">
                                     <a href="{{ route('students.show', $student) }}" class="text-sky-700">عرض</a>

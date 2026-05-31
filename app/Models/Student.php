@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Student extends Model
@@ -42,6 +44,28 @@ class Student extends Model
         return [
             'birth_date' => 'date',
         ];
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(StudentSession::class);
+    }
+
+    public function progress(): HasMany
+    {
+        return $this->hasMany(StudentProgress::class);
+    }
+
+    public function latestProgress(): HasOne
+    {
+        return $this->hasOne(StudentProgress::class)->latestOfMany();
+    }
+
+    public function gradeNumber(): int
+    {
+        $index = array_search($this->grade, self::GRADE_OPTIONS, true);
+
+        return $index === false ? 1 : $index + 1;
     }
 
     public function imageUrl(string $field): ?string

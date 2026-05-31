@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\LearningUnitController;
+use App\Http\Controllers\Api\StudentAuthController;
+use App\Http\Controllers\Api\StudentProgressController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlannerItemController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherStudentProgressController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +21,13 @@ Route::get('/student', function () {
     return view('welcome', ['initialView' => 'student']);
 })->name('student.platform');
 
-Route::get('/teacher', function () {
-    return view('welcome', ['initialView' => 'teacher']);
-})->name('teacher.platform');
+Route::middleware(['auth', 'teacher'])->group(function () {
+    Route::get('/teacher', function () {
+        return view('teacher.builder');
+    })->name('teacher.platform');
+
+    Route::get('/teacher/progress', TeacherStudentProgressController::class)->name('teacher.progress');
+});
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
@@ -55,6 +63,14 @@ Route::post('/api/save-progress', function (Request $request) {
     return response()->json(['status' => 'saved']);
 });
 
+Route::prefix('/api/student')->middleware('throttle:sensitive')->group(function () {
+    Route::post('/login', [StudentAuthController::class, 'login'])->name('api.student.login');
+    Route::post('/guest', [StudentAuthController::class, 'guest'])->name('api.student.guest');
+    Route::get('/me', [StudentAuthController::class, 'me'])->name('api.student.me');
+    Route::post('/logout', [StudentAuthController::class, 'logout'])->name('api.student.logout');
+    Route::post('/progress', [StudentProgressController::class, 'store'])->name('api.student.progress');
+});
+
 Route::get('/api/images', function (Request $request) {
     $query = trim((string) $request->query('q', 'education'));
     $type = in_array($request->query('type'), ['vector', 'illustration', 'photo'], true)
@@ -81,5 +97,7 @@ Route::get('/api/images', function (Request $request) {
 
     return response()->json($response->json());
 });
+
+Route::get('/api/learning-units', LearningUnitController::class)->name('api.learning-units');
 
 require __DIR__.'/auth.php';

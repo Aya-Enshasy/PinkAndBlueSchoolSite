@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-label="child expression">
+  <rect width="720" height="520" rx="42" fill="#eefaff"/>
+  <circle cx="152" cy="112" r="76" fill="#fff1d6"/>
+  <circle cx="588" cy="392" r="102" fill="#ffe5ef"/>
+  <g transform="translate(150 72)">
+    <rect x="48" y="62" width="360" height="260" rx="38" fill="#fff" stroke="#dce7f4" stroke-width="10"/>
+    <circle cx="190" cy="178" r="78" fill="#ffd2a8"/>
+    <path d="M112 159c10-70 63-111 128-90 48 15 72 55 70 105-41-27-83-40-133-33-27 4-48 11-65 18z" fill="#61412d"/>
+    <circle cx="162" cy="184" r="12" fill="#26324a"/>
+    <circle cx="222" cy="184" r="12" fill="#26324a"/>
+    <path d="M164 226c20 17 42 17 63 0" fill="none" stroke="#a96a4b" stroke-width="8" stroke-linecap="round"/>
+    <path d="M290 248c54-8 93 17 118 68" fill="none" stroke="#58cc02" stroke-width="18" stroke-linecap="round"/>
+    <rect x="96" y="284" width="194" height="78" rx="26" fill="#1cb0f6"/>
+    <path d="M332 94h148c22 0 40 18 40 40v42c0 22-18 40-40 40h-86l-47 44 10-44h-25c-22 0-40-18-40-40v-42c0-22 18-40 40-40z" fill="#fff" stroke="#dce7f4" stroke-width="8"/>
+    <circle cx="370" cy="154" r="10" fill="#d22d78"/>
+    <circle cx="410" cy="154" r="10" fill="#d22d78"/>
+    <circle cx="450" cy="154" r="10" fill="#d22d78"/>
+  </g>
+</svg>

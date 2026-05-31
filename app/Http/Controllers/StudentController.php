@@ -33,6 +33,12 @@ class StudentController extends Controller
         $highlightId = (int) $request->query('highlight', 0);
 
         $students = Student::query()
+            ->with('latestProgress')
+            ->withSum('progress as learning_xp', 'xp')
+            ->withCount([
+                'progress as started_lessons_count',
+                'progress as completed_lessons_count' => fn ($query) => $query->where('completed', true),
+            ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('full_name', 'like', "%{$search}%")
@@ -139,13 +145,24 @@ class StudentController extends Controller
     
     public function show(string $student): View|RedirectResponse
     {
-        $student = Student::query()->find($student);
+        $student = Student::query()
+            ->with('progress')
+            ->withSum('progress as learning_xp', 'xp')
+            ->withCount([
+                'progress as started_lessons_count',
+                'progress as completed_lessons_count' => fn ($query) => $query->where('completed', true),
+            ])
+            ->find($student);
 
         if (! $student) {
             return redirect()->route('students.index')->with('error', 'Student not found.');
         }
 
-        return view('students.show', compact('student'));
+        $progressRows = $student->progress()
+            ->latest('updated_at')
+            ->get();
+
+        return view('students.show', compact('student', 'progressRows'));
     }
 
     public function edit(string $student): View|RedirectResponse

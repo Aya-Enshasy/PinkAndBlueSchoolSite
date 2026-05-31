@@ -1,0 +1,43 @@
+<svg width="960" height="720" viewBox="0 0 960 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Compound light microscope illustration</title>
+  <desc id="desc">A friendly classroom-style illustration of a compound light microscope.</desc>
+  <rect width="960" height="720" rx="48" fill="#F7FBFF"/>
+  <circle cx="680" cy="160" r="96" fill="#D7F5FF"/>
+  <circle cx="240" cy="580" r="128" fill="#FFE8F2"/>
+  <g filter="url(#shadow)">
+    <path d="M300 612h382c25 0 45 20 45 45v18H255v-18c0-25 20-45 45-45z" fill="#215B9F"/>
+    <path d="M346 562h265c20 0 36 16 36 36v28H310v-28c0-20 16-36 36-36z" fill="#D22D78"/>
+    <path d="M421 533h145c21 0 38 17 38 38v18H383v-18c0-21 17-38 38-38z" fill="#9BD9FF"/>
+    <path d="M408 488h178c16 0 29 13 29 29v30H379v-30c0-16 13-29 29-29z" fill="#173B64"/>
+    <rect x="410" y="415" width="202" height="42" rx="18" fill="#FFC800"/>
+    <rect x="404" y="443" width="222" height="42" rx="18" fill="#FF8E3C"/>
+    <path d="M560 407c35-56 43-130 16-194l-40 17c20 50 14 107-15 151-25 38-66 63-111 69l6 43c59-8 112-40 144-86z" fill="#215B9F"/>
+    <path d="M474 286c45-29 76-75 84-128l-43-6c-6 40-29 75-63 96-29 19-64 26-98 20l-8 43c44 8 90-1 128-25z" fill="#2BADEB"/>
+    <path d="M399 205l135-78 28 49-135 78c-13 8-30 3-38-10l-1-1c-8-13-3-30 11-38z" fill="#D22D78"/>
+    <rect x="512" y="82" width="65" height="83" rx="18" transform="rotate(-30 512 82)" fill="#173B64"/>
+    <rect x="542" y="69" width="76" height="34" rx="17" transform="rotate(-30 542 69)" fill="#215B9F"/>
+    <circle cx="391" cy="470" r="28" fill="#58CC02"/>
+    <circle cx="603" cy="470" r="28" fill="#58CC02"/>
+    <rect x="454" y="343" width="116" height="42" rx="18" fill="#173B64"/>
+    <rect x="472" y="373" width="79" height="76" rx="22" fill="#D22D78"/>
+    <path d="M500 448h24v62h-24z" fill="#173B64"/>
+    <circle cx="512" cy="528" r="22" fill="#FFC800"/>
+    <path d="M332 331h134c12 0 22 10 22 22v16H310v-16c0-12 10-22 22-22z" fill="#173B64"/>
+    <rect x="278" y="366" width="248" height="24" rx="12" fill="#215B9F"/>
+    <rect x="320" y="393" width="162" height="16" rx="8" fill="#9BD9FF"/>
+    <path d="M599 232c16-6 34 2 40 18l20 53c6 16-2 34-18 40l-17 6-42-111 17-6z" fill="#FF8E3C"/>
+    <circle cx="638" cy="362" r="19" fill="#173B64"/>
+    <circle cx="638" cy="362" r="9" fill="#9BD9FF"/>
+  </g>
+  <g opacity=".72">
+    <path d="M214 142c16-28 56-28 72 0 16 28-4 63-36 63s-52-35-36-63z" fill="#FFC800"/>
+    <path d="M714 487c11-18 37-18 48 0 11 19-2 42-24 42s-35-23-24-42z" fill="#58CC02"/>
+    <circle cx="753" cy="112" r="13" fill="#D22D78"/>
+    <circle cx="183" cy="504" r="12" fill="#2BADEB"/>
+  </g>
+  <defs>
+    <filter id="shadow" x="217" y="35" width="548" height="676" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#1A2B44" flood-opacity=".18"/>
+    </filter>
+  </defs>
+</svg>

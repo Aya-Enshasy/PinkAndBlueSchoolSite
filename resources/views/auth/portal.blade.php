@@ -11,7 +11,7 @@
     <main class="role-select-shell">
         <section class="role-select-card">
             <header class="role-select-brand">
-                <img src="{{ asset('brand-logo.png') }}" alt="Pink & Blue School">
+                <img src="{{ asset('brand-logo.png') }}" alt="مدرسة بينك أند بلو">
             </header>
 
             <h1>حدد نوع المستخدم</h1>
@@ -33,17 +33,17 @@
                     </span>
                     <span class="role-select-copy">
                         <strong>معلم</strong>
-                        <small>إضافة الوحدات والدروس والأسئلة</small>
+                        <small>دخول آمن لإدارة الوحدات والدروس</small>
                     </span>
                 </a>
 
-                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="role-select-option">
+                <a href="{{ route('dashboard') }}" class="role-select-option">
                     <span class="role-select-art">
                         <img src="{{ asset('assets/roles/manager-role.jpg') }}" alt="مديرة تستخدم الكمبيوتر">
                     </span>
                     <span class="role-select-copy">
                         <strong>مدير</strong>
-                        <small>لوحة الإدارة والطلاب والأنشطة</small>
+                        <small>دخول آمن للوحة الإدارة والطلاب</small>
                     </span>
                 </a>
             </div>

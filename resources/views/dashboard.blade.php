@@ -16,6 +16,18 @@
                     <p class="kpi-label">إجمالي الملفات</p>
                     <h3 class="kpi-value">{{ $totalFiles }}</h3>
                 </div>
+                <div class="kpi-card kpi-mint floating-card" style="animation-delay:.18s">
+                    <p class="kpi-label">طلاب نشطون على المنصة</p>
+                    <h3 class="kpi-value">{{ $activeLearners }}</h3>
+                </div>
+                <div class="kpi-card kpi-pink floating-card" style="animation-delay:.22s">
+                    <p class="kpi-label">دروس مكتملة</p>
+                    <h3 class="kpi-value">{{ $completedLessons }}</h3>
+                </div>
+                <div class="kpi-card kpi-lilac floating-card" style="animation-delay:.26s">
+                    <p class="kpi-label">XP الطلاب</p>
+                    <h3 class="kpi-value">{{ $totalLearningXp }}</h3>
+                </div>
             </div>
 
             <div class="saas-panel p-5">
@@ -33,6 +45,13 @@
                                 <div>
                                     <p class="font-semibold text-slate-900">{{ $student->full_name }}</p>
                                     <p class="text-sm text-slate-500 mt-1">{{ $student->student_id_number }}</p>
+                                    <p class="text-xs text-slate-400 mt-1">
+                                        @if($student->latestProgress)
+                                            آخر نشاط: {{ $student->latestProgress->lesson_title }} · {{ $student->latestProgress->progress_percent }}%
+                                        @else
+                                            لم يبدأ التعلم بعد
+                                        @endif
+                                    </p>
                                 </div>
                                 <span class="text-lg">↗</span>
                             </a>

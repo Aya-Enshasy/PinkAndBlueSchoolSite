@@ -14,7 +14,18 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@school.com'],
             [
                 'name' => 'مدير النظام',
+                'role' => 'admin',
                 'password' => Hash::make('admin123'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::query()->updateOrCreate(
+            ['email' => 'teacher@school.com'],
+            [
+                'name' => 'معلم النظام',
+                'role' => 'teacher',
+                'password' => Hash::make('teacher123'),
                 'email_verified_at' => now(),
             ]
         );

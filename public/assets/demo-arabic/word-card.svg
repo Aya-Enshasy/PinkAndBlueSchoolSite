@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-label="word cards">
+  <rect width="720" height="520" rx="42" fill="#fff8ec"/>
+  <circle cx="585" cy="120" r="88" fill="#e6f4ff"/>
+  <circle cx="142" cy="400" r="94" fill="#ffe1ef"/>
+  <g transform="translate(118 96)">
+    <rect x="0" y="34" width="152" height="178" rx="24" fill="#fff" stroke="#f5a5c9" stroke-width="10"/>
+    <rect x="174" y="0" width="152" height="178" rx="24" fill="#fff" stroke="#91cdfa" stroke-width="10"/>
+    <rect x="348" y="46" width="152" height="178" rx="24" fill="#fff" stroke="#c9b6ff" stroke-width="10"/>
+    <path d="M52 116c48 10 66-22 86-48-4 60-26 101-78 105-30 2-51-12-60-38 12-15 28-21 52-19z" fill="#58cc02"/>
+    <path d="M245 50c-26 30-50 75-19 104 32 30 90 4 92-41 1-36-29-61-73-63z" fill="#ffb14a"/>
+    <path d="M420 88c50-16 83 13 77 58-5 41-52 61-88 41-33-18-32-80 11-99z" fill="#ff4b4b"/>
+    <path d="M77 70c8-26 25-43 58-48" stroke="#58cc02" stroke-width="11" fill="none" stroke-linecap="round"/>
+    <path d="M251 34c14-22 31-29 52-24" stroke="#58cc02" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M448 55c10-22 27-34 53-33" stroke="#58cc02" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <rect x="34" y="260" width="430" height="54" rx="27" fill="#fff" stroke="#dce7f4" stroke-width="8"/>
+    <rect x="72" y="342" width="360" height="54" rx="27" fill="#fff" stroke="#dce7f4" stroke-width="8"/>
+  </g>
+</svg>

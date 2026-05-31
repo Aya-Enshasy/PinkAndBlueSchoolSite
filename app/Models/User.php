@@ -21,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -45,5 +46,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return ($this->role ?? null) === 'admin' || $this->email === 'admin@school.com';
+    }
+
+    public function isTeacher(): bool
+    {
+        return ($this->role ?? null) === 'teacher' || $this->email === 'teacher@school.com';
+    }
+
+    public function roleName(): string
+    {
+        return match ($this->role ?? null) {
+            'teacher' => 'معلم',
+            'admin' => 'مدير',
+            default => 'مستخدم',
+        };
     }
 }

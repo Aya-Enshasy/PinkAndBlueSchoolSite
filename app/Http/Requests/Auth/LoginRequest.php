@@ -28,8 +28,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email', 'in:admin@school.com'],
+            'email' => ['required', 'string', 'email', 'in:admin@school.com,teacher@school.com'],
             'password' => ['required', 'string'],
+            'role' => ['required', 'string', 'in:admin,teacher'],
         ];
     }
 
@@ -47,6 +48,18 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        $user = Auth::user();
+        $role = (string) $this->input('role');
+
+        if (($role === 'admin' && ! $user?->isAdmin()) || ($role === 'teacher' && ! $user?->isTeacher())) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'هذه البيانات لا تملك صلاحية الدخول لهذا القسم.',
             ]);
         }
 

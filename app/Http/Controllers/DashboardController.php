@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PlannerItem;
 use App\Models\Student;
+use App\Models\StudentProgress;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -33,7 +34,10 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'totalStudents' => Student::count(),
-            'recentStudents' => Student::latest()->take(5)->get(),
+            'recentStudents' => Student::with('latestProgress')->latest()->take(5)->get(),
+            'activeLearners' => StudentProgress::query()->distinct('student_id')->count('student_id'),
+            'completedLessons' => StudentProgress::query()->where('completed', true)->count(),
+            'totalLearningXp' => StudentProgress::query()->sum('xp'),
             'totalFiles' => Student::query()
                 ->selectRaw('SUM(
                     (CASE WHEN student_id_image IS NULL OR student_id_image = \'\' THEN 0 ELSE 1 END) +

@@ -14,9 +14,15 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.login');
+        $requestedRole = $request->query('role');
+        $intended = (string) $request->session()->get('url.intended', '');
+        $loginRole = in_array($requestedRole, ['admin', 'teacher'], true)
+            ? $requestedRole
+            : (str_contains($intended, '/teacher') ? 'teacher' : 'admin');
+
+        return view('auth.login', ['loginRole' => $loginRole]);
     }
 
     /**
@@ -27,6 +33,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+        $request->session()->put('auth_role', $request->input('role'));
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

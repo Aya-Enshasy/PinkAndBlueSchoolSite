@@ -12,11 +12,10 @@ class EnsureAdmin
     {
         $user = $request->user();
 
-        if (! $user || $user->email !== 'admin@school.com') {
+        if (! $user || ! $user->isAdmin()) {
             abort(403, 'غير مصرح لك بالدخول لهذه الصفحة.');
         }
 
         return $next($request);
     }
 }
-
