@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminUserSeeder::class,
             GradeSixScienceMicroscopeSeeder::class,
+            GradeEightScienceClassificationSeeder::class,
         ]);
     }
 }

@@ -1,0 +1,41 @@
+<svg width="960" height="720" viewBox="0 0 960 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Taxonomy tree illustration</title>
+  <desc id="desc">A clean educational illustration showing biological classification as connected levels.</desc>
+  <rect width="960" height="720" rx="46" fill="#F6FBFF"/>
+  <circle cx="750" cy="120" r="96" fill="#D9F5FF"/>
+  <circle cx="210" cy="590" r="120" fill="#E9F8E4"/>
+  <path d="M480 138v432" stroke="#215B9F" stroke-width="16" stroke-linecap="round"/>
+  <path d="M480 218c-88 0-146 33-185 86" stroke="#2BADEB" stroke-width="12" stroke-linecap="round"/>
+  <path d="M480 306c88 0 146 33 185 86" stroke="#D22D78" stroke-width="12" stroke-linecap="round"/>
+  <path d="M480 398c-90 10-150 45-188 106" stroke="#58CC02" stroke-width="12" stroke-linecap="round"/>
+  <path d="M480 482c86 10 146 46 186 106" stroke="#FFC800" stroke-width="12" stroke-linecap="round"/>
+  <g filter="url(#shadow)">
+    <rect x="341" y="86" width="278" height="92" rx="28" fill="#215B9F"/>
+    <rect x="166" y="256" width="246" height="84" rx="26" fill="#2BADEB"/>
+    <rect x="548" y="344" width="246" height="84" rx="26" fill="#D22D78"/>
+    <rect x="162" y="482" width="250" height="84" rx="26" fill="#58CC02"/>
+    <rect x="548" y="570" width="246" height="84" rx="26" fill="#FFC800"/>
+    <circle cx="480" cy="225" r="34" fill="#173B64"/>
+    <circle cx="480" cy="314" r="34" fill="#173B64"/>
+    <circle cx="480" cy="403" r="34" fill="#173B64"/>
+    <circle cx="480" cy="492" r="34" fill="#173B64"/>
+  </g>
+  <g fill="#fff" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="480" y="128" font-size="28">Kingdom</text>
+    <text x="480" y="158" font-size="18" opacity=".82">largest group</text>
+    <text x="289" y="305" font-size="25">Phylum</text>
+    <text x="671" y="393" font-size="25">Class</text>
+    <text x="287" y="531" font-size="25">Family</text>
+    <text x="671" y="619" font-size="25" fill="#173B64">Species</text>
+  </g>
+  <g opacity=".65">
+    <circle cx="202" cy="158" r="18" fill="#D22D78"/>
+    <circle cx="738" cy="501" r="16" fill="#2BADEB"/>
+    <path d="M142 388c14-25 50-25 64 0 14 25-4 56-32 56s-46-31-32-56z" fill="#FFC800"/>
+  </g>
+  <defs>
+    <filter id="shadow" x="118" y="58" width="720" height="636" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#172033" flood-opacity=".16"/>
+    </filter>
+  </defs>
+</svg>

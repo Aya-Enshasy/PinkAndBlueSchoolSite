@@ -1,0 +1,46 @@
+<svg width="960" height="720" viewBox="0 0 960 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Bacterial cell illustration</title>
+  <desc id="desc">A friendly science illustration of a bacterium with capsule, cell wall, cytoplasm, DNA, flagellum and pili.</desc>
+  <rect width="960" height="720" rx="46" fill="#F7FCFF"/>
+  <circle cx="760" cy="120" r="98" fill="#E8F7FF"/>
+  <circle cx="210" cy="570" r="122" fill="#FFE8F2"/>
+  <g filter="url(#shadow)">
+    <path d="M722 312c73 94 41 221-68 272-120 57-292 35-394-36-94-65-108-174-33-251 113-116 383-119 495 15z" fill="#A7E86B"/>
+    <path d="M694 320c60 77 34 181-56 223-100 47-242 29-327-30-78-55-89-146-27-210 93-96 317-98 410 17z" fill="#58CC02"/>
+    <path d="M650 340c47 61 26 141-44 174-78 37-189 22-255-24-61-42-70-113-21-163 73-75 248-77 320 13z" fill="#DFF7C8"/>
+    <path d="M560 430c45-50 114-46 148 7" stroke="#215B9F" stroke-width="18" stroke-linecap="round"/>
+    <path d="M358 407c41-46 102-45 140 2" stroke="#D22D78" stroke-width="18" stroke-linecap="round"/>
+    <path d="M478 346c28-21 74-20 99 4" stroke="#FF8E3C" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="394" cy="476" r="20" fill="#215B9F"/>
+    <circle cx="516" cy="503" r="18" fill="#215B9F"/>
+    <circle cx="604" cy="464" r="18" fill="#215B9F"/>
+    <path d="M257 320c-49-61-116-91-177-77" stroke="#58CC02" stroke-width="18" stroke-linecap="round"/>
+    <path d="M248 359c-58-22-112-20-160 8" stroke="#58CC02" stroke-width="16" stroke-linecap="round"/>
+    <path d="M680 542c56 67 118 95 183 78" stroke="#58CC02" stroke-width="18" stroke-linecap="round"/>
+    <path d="M714 505c68 19 123 5 164-43" stroke="#58CC02" stroke-width="16" stroke-linecap="round"/>
+    <path d="M736 399c56 2 102-23 135-75" stroke="#58CC02" stroke-width="15" stroke-linecap="round"/>
+    <path d="M234 271c-50-36-93-79-127-129" stroke="#58CC02" stroke-width="15" stroke-linecap="round"/>
+    <path d="M268 548c-50 52-99 77-148 75" stroke="#58CC02" stroke-width="15" stroke-linecap="round"/>
+  </g>
+  <g>
+    <rect x="86" y="74" width="235" height="62" rx="24" fill="#fff" stroke="#D7E4F2" stroke-width="4"/>
+    <rect x="638" y="78" width="236" height="62" rx="24" fill="#fff" stroke="#D7E4F2" stroke-width="4"/>
+    <rect x="80" y="606" width="252" height="62" rx="24" fill="#fff" stroke="#D7E4F2" stroke-width="4"/>
+    <rect x="628" y="610" width="252" height="62" rx="24" fill="#fff" stroke="#D7E4F2" stroke-width="4"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-weight="700" fill="#173B64">
+    <text x="126" y="113" font-size="24">Capsule</text>
+    <text x="680" y="117" font-size="24">DNA</text>
+    <text x="122" y="645" font-size="24">Flagellum</text>
+    <text x="668" y="649" font-size="24">Cell wall</text>
+  </g>
+  <path d="M300 124l105 170" stroke="#9AA8B8" stroke-width="4" stroke-dasharray="8 10"/>
+  <path d="M647 127l-87 218" stroke="#9AA8B8" stroke-width="4" stroke-dasharray="8 10"/>
+  <path d="M254 606l-24-60" stroke="#9AA8B8" stroke-width="4" stroke-dasharray="8 10"/>
+  <path d="M704 610l-62-110" stroke="#9AA8B8" stroke-width="4" stroke-dasharray="8 10"/>
+  <defs>
+    <filter id="shadow" x="52" y="114" width="855" height="545" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#172033" flood-opacity=".16"/>
+    </filter>
+  </defs>
+</svg>

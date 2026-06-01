@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\LearningUnitController;
 use App\Http\Controllers\Api\StudentAuthController;
 use App\Http\Controllers\Api\StudentProgressController;
+use App\Http\Controllers\Api\TextToSpeechController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlannerItemController;
 use App\Http\Controllers\ProfileController;
@@ -99,5 +100,9 @@ Route::get('/api/images', function (Request $request) {
 });
 
 Route::get('/api/learning-units', LearningUnitController::class)->name('api.learning-units');
+
+Route::post('/api/tts/speech', TextToSpeechController::class)
+    ->middleware('throttle:sensitive')
+    ->name('api.tts.speech');
 
 require __DIR__.'/auth.php';

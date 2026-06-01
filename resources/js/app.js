@@ -586,13 +586,65 @@ function nextLesson(unit, lessonId) {
     return unit.lessons[index + 1] || null;
 }
 
-function speakText(text) {
+let activeSpeechAudio = null;
+
+function cleanSpeechText(text) {
+    return String(text || '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function speechLanguage(text) {
+    return /[\u0600-\u06FF]/.test(text) ? 'ar-AE' : 'en-US';
+}
+
+function browserSpeakText(text) {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = /[A-Za-z]/.test(text) ? 'en-US' : 'ar';
-    utterance.rate = 0.9;
+    utterance.lang = speechLanguage(text);
+    utterance.rate = /[\u0600-\u06FF]/.test(text) ? 0.82 : 0.9;
     window.speechSynthesis.speak(utterance);
+}
+
+async function speakText(text) {
+    const cleaned = cleanSpeechText(text);
+    if (!cleaned) return;
+
+    if (activeSpeechAudio) {
+        activeSpeechAudio.pause();
+        activeSpeechAudio.currentTime = 0;
+    }
+
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+
+    try {
+        const response = await fetch('/api/tts/speech', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                ...(CSRF_TOKEN ? { 'X-CSRF-TOKEN': CSRF_TOKEN } : {}),
+            },
+            body: JSON.stringify({
+                text: cleaned,
+                language: speechLanguage(cleaned),
+            }),
+        });
+
+        if (!response.ok) throw new Error('TTS request failed');
+
+        const payload = await response.json();
+        if (!payload?.url) throw new Error('TTS response missing audio URL');
+
+        activeSpeechAudio = new Audio(payload.url);
+        await activeSpeechAudio.play();
+    } catch (error) {
+        browserSpeakText(cleaned);
+    }
 }
 
 function escapeHtml(value = '') {
